@@ -7,34 +7,22 @@ interface Product {
   title: string
   price: number
   image: string
+  description: string
 }
 
 async function getProducts() {
   try {
-    // Use absolute URL for SSR or fallback to relative for client-side
-    let baseUrl = "";
-    
-    if (process.env.VERCEL_URL) {
-      // Check if VERCEL_URL already includes the protocol
-      baseUrl = process.env.VERCEL_URL.startsWith('http')
-        ? process.env.VERCEL_URL
-        : `https://${process.env.VERCEL_URL}`;
-      
-      // Remove trailing slash if present
-      baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-    } else if (process.env.NODE_ENV === "development") {
-      baseUrl = "http://localhost:3000";
-    }
+    // Get the base URL - Vercel automatically provides VERCEL_URL
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : process.env.NODE_ENV === "development"
+        ? "http://localhost:3000"
+        : "http://localhost:3000"
 
-    console.log("Base URL:", baseUrl);
-
-    // Construct the full URL using the baseUrl
-    const url = `${baseUrl}/api/products`;
-    
-    console.log("Fetching from:", url);
+    const url = `${baseUrl}/api/products`
 
     const res = await fetch(url, {
-      cache: "force-cache",
+      next: { revalidate: 3600 }, // Use revalidate instead of force-cache
     })
 
     if (!res.ok) {
@@ -51,18 +39,21 @@ async function getProducts() {
         title: "Wireless Headphones",
         price: 99.99,
         image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop",
+        description: "High-quality wireless headphones",
       },
       {
         id: 2,
         title: "Smart Watch",
         price: 199.99,
         image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop",
+        description: "Advanced fitness tracking",
       },
       {
         id: 3,
         title: "Laptop Stand",
         price: 49.99,
         image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=300&h=300&fit=crop",
+        description: "Ergonomic laptop positioning",
       },
     ]
   }

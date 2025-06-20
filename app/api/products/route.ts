@@ -41,10 +41,17 @@ const products = [
 
 export async function GET() {
   try {
+    console.log("API called at:", new Date().toISOString())
+
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 100))
 
-    return NextResponse.json(products)
+    const response = NextResponse.json(products)
+
+    // Set cache headers for the API response
+    response.headers.set("Cache-Control", "public, max-age=3600, s-maxage=3600")
+
+    return response
   } catch (error) {
     console.error("API Error:", error)
     return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 })
