@@ -12,16 +12,29 @@ interface Product {
 async function getProducts() {
   try {
     // Use absolute URL for SSR or fallback to relative for client-side
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : process.env.NODE_ENV === "development"
-        ? "http://localhost:3000"
-        : ""
+    let baseUrl = "";
+    
+    if (process.env.VERCEL_URL) {
+      // Check if VERCEL_URL already includes the protocol
+      baseUrl = process.env.VERCEL_URL.startsWith('http')
+        ? process.env.VERCEL_URL
+        : `https://${process.env.VERCEL_URL}`;
+      
+      // Remove trailing slash if present
+      baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    } else if (process.env.NODE_ENV === "development") {
+      baseUrl = "http://localhost:3000";
+    }
 
-    const url = baseUrl ? `${baseUrl}/api/products` : "/api/products"
+    console.log("Base URL:", baseUrl);
+
+    // Construct the full URL using the baseUrl
+    const url = `${baseUrl}/api/products`;
+    
+    console.log("Fetching from:", url);
 
     const res = await fetch(url, {
-      cache: "force-cache", 
+      cache: "force-cache",
     })
 
     if (!res.ok) {
